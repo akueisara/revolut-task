@@ -22,9 +22,9 @@
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
-        android:background="?android:attr/selectableItemBackground"
         android:padding="16dp"
-        android:focusableInTouchMode="true">
+        android:focusableInTouchMode="true"
+        android:background="?android:attr/selectableItemBackground">
 
         <ImageView
             android:id="@+id/nationalFlagImageView"
@@ -75,11 +75,11 @@
             android:fontFamily="@font/roboto_medium"
             android:inputType="numberDecimal"
             android:maxEms="5"
-            android:text="@={Converter.doubleToRateString(rate.rate)}"
+            android:maxLength="10"
+            android:text="@{Converter.doubleToRateString(rate.rate)}"
             android:imeOptions="actionDone"
-            android:textAlignment="viewEnd"
             android:textSize="20sp"
-            tools:text="11803.06" />
+            tools:text="1183330.06" />
 
     </RelativeLayout>
 </layout>

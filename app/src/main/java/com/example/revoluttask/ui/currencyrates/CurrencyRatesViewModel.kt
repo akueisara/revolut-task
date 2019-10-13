@@ -5,13 +5,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.revoluttask.model.Rate
 import com.example.revoluttask.network.RevolutApi
 import com.example.revoluttask.network.RevolutApiStatus
 import com.example.revoluttask.network.latestrate.Rates
 import kotlinx.coroutines.*
-import timber.log.Timber
 import kotlin.reflect.full.memberProperties
 
 class CurrencyRatesViewModel(val app: Application): AndroidViewModel(app) {
@@ -36,6 +34,8 @@ class CurrencyRatesViewModel(val app: Application): AndroidViewModel(app) {
         get() = _ratesList
 
     private var viewModelJob: Job? = null
+
+    private var isUpdating = false
 
     fun pauseJob() {
         viewModelJob?.cancel()
@@ -67,7 +67,7 @@ class CurrencyRatesViewModel(val app: Application): AndroidViewModel(app) {
 
     private fun ratesToRateList(rates: Rates, baseRate: String): ArrayList<Rate> {
         val rateList: ArrayList<Rate> = ArrayList()
-        rateList.add(Rate(baseRate, DEFAULT_CURRENCY_RATE * currencyRate))
+        rateList.add(Rate(baseRate, currencyRate))
         Rates::class.memberProperties.forEach { member ->
             val rate = member.get(rates) as Double?
             if (rate != null) {
@@ -77,11 +77,11 @@ class CurrencyRatesViewModel(val app: Application): AndroidViewModel(app) {
         return rateList
     }
 
-    fun onUpdateRate(rate: Rate) {
-        Timber.d("onUpdateRate")
-        _ratesList.value!![0] = rate
-        currencyCode = rate.code
-        currencyRate = rate.rate
+    fun onUpdateRates(rateList: MutableList<Rate>) {
+        if(rateList.size > 0) {
+            currencyCode = rateList[0].code
+            currencyRate = rateList[0].rate
+        }
     }
 
     override fun onCleared() {

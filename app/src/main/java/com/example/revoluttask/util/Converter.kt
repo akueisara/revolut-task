@@ -13,6 +13,9 @@ object Converter {
 
     @JvmStatic
     fun rateStringToDouble(value: String): Double {
+        if(value.isEmpty() || value.toDoubleOrNull() == 0.0) {
+            return 1.0
+        }
         val nf = NumberFormat.getInstance(Locale.US)
         val df = nf.parse(value).toDouble()
         return df
