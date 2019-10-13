@@ -20,4 +20,9 @@ object Converter {
         val df = nf.parse(value).toDouble()
         return df
     }
+
+    @JvmStatic
+    fun currencyCodeToName(code: String): String {
+        return Currency.getInstance(code).displayName
+    }
 }

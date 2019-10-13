@@ -25,13 +25,13 @@ class CurrencyRatesAdapter(var rateList: MutableList<Rate>, val clickListener: R
 
             binding.rateItemLayout.setOnFocusChangeListener { _, hasFocus ->
                 if (hasFocus) {
-                    scrollToTop(layoutPosition, false)
+                    scrollToTop(false)
                 }
             }
 
             binding.currencyRateEditText.setOnFocusChangeListener { _, hasFocus ->
                 if (hasFocus) {
-                    scrollToTop(layoutPosition, true)
+                    scrollToTop(true)
                 }
             }
 
@@ -56,7 +56,7 @@ class CurrencyRatesAdapter(var rateList: MutableList<Rate>, val clickListener: R
 
                         firstCurrency.rate = baseCurrencyRate
 
-                        clickListener.onUpdateRates(rateList)
+                        clickListener.onUpdateRates(rateList, false)
                     }
                 }
             })
@@ -73,25 +73,24 @@ class CurrencyRatesAdapter(var rateList: MutableList<Rate>, val clickListener: R
                 }
             })
 
-//            binding.currencyRateEditText.setSelection(binding.currencyRateEditText?.text?.split(".")?.get(0)?.length ?: 0)
             binding.currencyRateEditText.placeCursorToProperDigitPosition()
             binding.executePendingBindings()
         }
 
-        private fun scrollToTop(layoutPosition: Int, keepFocus: Boolean) {
+        private fun scrollToTop(keepFocus: Boolean) {
             if(layoutPosition > 0) {
                 rateList.removeAt(layoutPosition).also {
                     it.rate = 1.0
-                    rateList.add(0, it)
-                    clickListener.onUpdateRates(rateList)
+                    rateList.add(0, it).let {
+                        clickListener.onUpdateRates(rateList, true)
+                    }
                 }
                 notifyItemMoved(layoutPosition, 0)
-
             }
             if(!keepFocus) {
                 Handler().postDelayed({
                     binding.rateItemLayout.clearFocus()
-                }, 200)
+                }, 100)
             }
         }
     }
@@ -113,6 +112,6 @@ class CurrencyRatesAdapter(var rateList: MutableList<Rate>, val clickListener: R
 
 }
 
-class RateClickListener(val clickListener: (rateList: MutableList<Rate>) -> Unit) {
-    fun onUpdateRates(rateList: MutableList<Rate>) = clickListener(rateList)
+class RateClickListener(val clickListener: (rateList: MutableList<Rate>, moveToTop: Boolean) -> Unit) {
+    fun onUpdateRates(rateList: MutableList<Rate>, moveToTop: Boolean) = clickListener(rateList, moveToTop)
 }

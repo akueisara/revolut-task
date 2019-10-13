@@ -2,5 +2,6 @@ package com.example.revoluttask.model
 
 data class Rate(
     val code: String,
-    var rate: Double
+    var rate: Double,
+    var flagImageResId: Int
 )

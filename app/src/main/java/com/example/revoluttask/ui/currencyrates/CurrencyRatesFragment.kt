@@ -26,8 +26,8 @@ class CurrencyRatesFragment : Fragment() {
 
         viewDataBinding.viewModel = viewModel
 
-        currencyRatesadapter = CurrencyRatesAdapter(mutableListOf(), RateClickListener { rateList ->
-            viewModel.onUpdateRates(rateList)
+        currencyRatesadapter = CurrencyRatesAdapter(mutableListOf(), RateClickListener { rateList, moveToTop ->
+            viewModel.onUpdateRates(rateList, moveToTop)
         })
 
         viewDataBinding.ratesListRecyclerView.adapter = currencyRatesadapter
