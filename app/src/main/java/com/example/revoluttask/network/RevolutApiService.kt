@@ -12,8 +12,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
+import java.util.concurrent.TimeUnit
 
-enum class RevolutApiStatus { LOADING, ERROR, DONE }
+enum class RevolutApiStatus { LOADING, ERROR, DONE, LOCALDATA }
 
 private const val API_BASE_URL = "https://revolut.duckdns.org/"
 
@@ -25,6 +26,9 @@ private val client = OkHttpClient().newBuilder()
     .addInterceptor(HttpLoggingInterceptor().apply {
         level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
     })
+    .readTimeout(5, TimeUnit.SECONDS)
+    .writeTimeout(5, TimeUnit.SECONDS)
+    .connectTimeout(5, TimeUnit.SECONDS)
     .build()
 
 private val retrofit = Retrofit.Builder()

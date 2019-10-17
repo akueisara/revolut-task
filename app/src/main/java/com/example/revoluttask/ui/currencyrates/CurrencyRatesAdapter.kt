@@ -16,6 +16,8 @@ import com.example.revoluttask.util.placeCursorToProperDigitPosition
 
 
 class CurrencyRatesAdapter(var rateList: MutableList<Rate>, val clickListener: RateClickListener) : RecyclerView.Adapter<CurrencyRatesAdapter.ViewHolder>()  {
+    private var APIConnected = true
+
     override fun getItemCount() = rateList.size
 
     inner class ViewHolder(private var binding: ListRatesBinding):
@@ -35,9 +37,12 @@ class CurrencyRatesAdapter(var rateList: MutableList<Rate>, val clickListener: R
                 }
             }
 
+            if(!APIConnected) {
+                binding.currencyRateEditText.isEnabled = false
+            }
+
             binding.currencyRateEditText.addTextChangedListener(object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
-
                 }
 
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -78,7 +83,7 @@ class CurrencyRatesAdapter(var rateList: MutableList<Rate>, val clickListener: R
         }
 
         private fun scrollToTop(keepFocus: Boolean) {
-            if(layoutPosition > 0) {
+            if(APIConnected && layoutPosition > 0) {
                 rateList.removeAt(layoutPosition).also {
                     it.rate = 1.0
                     rateList.add(0, it).let {
@@ -98,6 +103,10 @@ class CurrencyRatesAdapter(var rateList: MutableList<Rate>, val clickListener: R
     fun updateData(updatedList: MutableList<Rate>) {
         rateList = updatedList
         notifyDataSetChanged()
+    }
+
+    fun updateConnectStatus(connected: Boolean) {
+        APIConnected = connected
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

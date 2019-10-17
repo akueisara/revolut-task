@@ -10,6 +10,8 @@ import androidx.lifecycle.Observer
 import com.example.revoluttask.databinding.FragmentCurrencyRatesBinding
 import com.example.revoluttask.util.getViewModelFactory
 import androidx.recyclerview.widget.SimpleItemAnimator
+import com.example.revoluttask.network.RevolutApiStatus
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 
 class CurrencyRatesFragment : Fragment() {
 
@@ -33,14 +35,52 @@ class CurrencyRatesFragment : Fragment() {
         viewDataBinding.ratesListRecyclerView.adapter = currencyRatesadapter
         (viewDataBinding.ratesListRecyclerView.getItemAnimator() as SimpleItemAnimator).supportsChangeAnimations = false
 
+        viewModel.status.observe(this, Observer {
+            it?.let {
+               when(it) {
+                   RevolutApiStatus.LOADING -> {
+                       currencyRatesadapter.updateConnectStatus(true)
+                       viewDataBinding.loadingProgressBar.visibility = View.VISIBLE
+                       viewDataBinding.ratesListRecyclerView.visibility = View.GONE
+                       viewDataBinding.errorLayout.visibility = View.GONE
+                       viewDataBinding.noInternetBottomLayout.visibility = View.GONE
+                   }
+                   RevolutApiStatus.DONE -> {
+                       viewDataBinding.loadingProgressBar.visibility = View.GONE
+                       viewDataBinding.ratesListRecyclerView.visibility = View.VISIBLE
+                   }
+                   RevolutApiStatus.LOCALDATA -> {
+                       currencyRatesadapter.updateConnectStatus(false)
+                       viewDataBinding.loadingProgressBar.visibility = View.GONE
+                       viewDataBinding.ratesListRecyclerView.visibility = View.VISIBLE
+                       viewDataBinding.noInternetBottomLayout.visibility = View.VISIBLE
+                   }
+                   RevolutApiStatus.ERROR -> {
+                       currencyRatesadapter.updateConnectStatus(false)
+                       viewDataBinding.loadingProgressBar.visibility = View.GONE
+                       viewDataBinding.errorLayout.visibility = View.VISIBLE
+                   }
+               }
+            }
+        })
+
+        viewModel.ratesListFromDB.observe(this, Observer {
+            if(it != null) {
+                viewModel.updateRateList(it)
+            }
+        })
+
         viewModel.rateList.observe(this, Observer {
-            currencyRatesadapter.updateData(it)
+            if(it != null) {
+                currencyRatesadapter.updateData(it)
+            }
         })
 
         return viewDataBinding.root
     }
 
 
+    @ObsoleteCoroutinesApi
     override fun onResume() {
         super.onResume()
         viewModel.resumeJob()
