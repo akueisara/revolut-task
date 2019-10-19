@@ -29,7 +29,7 @@ class CurrencyRatesFragment : Fragment() {
 
         viewDataBinding.viewModel = viewModel
 
-        currencyRatesadapter = CurrencyRatesAdapter(mutableListOf(), RateClickListener { rateList, moveToTop ->
+        currencyRatesadapter = CurrencyRatesAdapter(context!!, mutableListOf(), RateClickListener { rateList, moveToTop ->
             viewModel.onUpdateRates(rateList, moveToTop)
         })
 
@@ -48,7 +48,7 @@ class CurrencyRatesFragment : Fragment() {
 
         viewModel.ratesListFromDB.observe(this, Observer {
             if(it != null) {
-                viewModel.onGetRateListFromDB(it)
+                viewModel.onGetRateListFromDBorResponse(it)
             }
         })
 

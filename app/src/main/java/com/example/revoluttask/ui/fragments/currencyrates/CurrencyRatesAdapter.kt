@@ -17,14 +17,16 @@ import android.widget.TextView
 import com.example.revoluttask.utils.placeCursorToProperDigitPosition
 
 
-class CurrencyRatesAdapter(var rateList: MutableList<Rate>, val clickListener: RateClickListener) : RecyclerView.Adapter<CurrencyRatesAdapter.ViewHolder>()  {
+class CurrencyRatesAdapter(val context: Context, var rateList: MutableList<Rate>, val clickListener: RateClickListener) : RecyclerView.Adapter<CurrencyRatesAdapter.ViewHolder>()  {
     private var APIConnected = true
 
     override fun getItemCount() = rateList.size
 
     inner class ViewHolder(private var binding: ListRatesBinding):
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(rate: Rate) {
+        fun bind(rate: Rate, position: Int) {
+            binding.currencyRateEditText.isEnabled = !(position != 0 && !APIConnected)
+
             binding.rate = rate
 
             binding.rateItemLayout.setOnFocusChangeListener { _, hasFocus ->
@@ -69,6 +71,8 @@ class CurrencyRatesAdapter(var rateList: MutableList<Rate>, val clickListener: R
                     when (actionId) {
                         EditorInfo.IME_ACTION_DONE -> {
                             binding.rateItemLayout.clearFocus()
+                            val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                            imm.hideSoftInputFromWindow(v.windowToken, 0)
                             return true
                         }
                     }
@@ -114,7 +118,7 @@ class CurrencyRatesAdapter(var rateList: MutableList<Rate>, val clickListener: R
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val rate = rateList[position]
-        holder.bind(rate)
+        holder.bind(rate, position)
     }
 
 }

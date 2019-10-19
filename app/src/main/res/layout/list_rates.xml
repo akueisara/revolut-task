@@ -79,6 +79,7 @@
             android:inputType="numberDecimal"
             android:maxEms="@integer/currency_rate_edittext_max_ems"
             android:maxLength="@integer/currency_rate_edittext_max_length"
+            android:textColor="@color/primary_black"
             android:text="@{Converter.doubleToRateString(rate.rate)}"
             tools:text="1183330.06" />
 
