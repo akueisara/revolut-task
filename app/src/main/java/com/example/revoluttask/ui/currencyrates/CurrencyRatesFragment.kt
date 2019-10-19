@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import com.example.revoluttask.databinding.FragmentCurrencyRatesBinding
-import com.example.revoluttask.util.getViewModelFactory
+import com.example.revoluttask.utils.getViewModelFactory
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.example.revoluttask.network.RevolutApiStatus
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -21,6 +21,7 @@ class CurrencyRatesFragment : Fragment() {
 
     private lateinit var currencyRatesadapter: CurrencyRatesAdapter
 
+    @ObsoleteCoroutinesApi
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         viewDataBinding = FragmentCurrencyRatesBinding.inflate(inflater)
 
@@ -33,40 +34,21 @@ class CurrencyRatesFragment : Fragment() {
         })
 
         viewDataBinding.ratesListRecyclerView.adapter = currencyRatesadapter
-        (viewDataBinding.ratesListRecyclerView.getItemAnimator() as SimpleItemAnimator).supportsChangeAnimations = false
+        (viewDataBinding.ratesListRecyclerView.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
 
         viewModel.status.observe(this, Observer {
             it?.let {
-               when(it) {
-                   RevolutApiStatus.LOADING -> {
-                       currencyRatesadapter.updateConnectStatus(true)
-                       viewDataBinding.loadingProgressBar.visibility = View.VISIBLE
-                       viewDataBinding.ratesListRecyclerView.visibility = View.GONE
-                       viewDataBinding.errorLayout.visibility = View.GONE
-                       viewDataBinding.noInternetBottomLayout.visibility = View.GONE
-                   }
-                   RevolutApiStatus.DONE -> {
-                       viewDataBinding.loadingProgressBar.visibility = View.GONE
-                       viewDataBinding.ratesListRecyclerView.visibility = View.VISIBLE
-                   }
-                   RevolutApiStatus.LOCALDATA -> {
-                       currencyRatesadapter.updateConnectStatus(false)
-                       viewDataBinding.loadingProgressBar.visibility = View.GONE
-                       viewDataBinding.ratesListRecyclerView.visibility = View.VISIBLE
-                       viewDataBinding.noInternetBottomLayout.visibility = View.VISIBLE
-                   }
-                   RevolutApiStatus.ERROR -> {
-                       currencyRatesadapter.updateConnectStatus(false)
-                       viewDataBinding.loadingProgressBar.visibility = View.GONE
-                       viewDataBinding.errorLayout.visibility = View.VISIBLE
-                   }
-               }
+                if(it == RevolutApiStatus.LOADING) {
+                    currencyRatesadapter.updateConnectStatus(true)
+                } else if(it == RevolutApiStatus.DONE_WITHOUT_CONNECTION || it == RevolutApiStatus.ERROR) {
+                    currencyRatesadapter.updateConnectStatus(false)
+                }
             }
         })
 
         viewModel.ratesListFromDB.observe(this, Observer {
             if(it != null) {
-                viewModel.updateRateList(it)
+                viewModel.onGetRateListFromDB(it)
             }
         })
 

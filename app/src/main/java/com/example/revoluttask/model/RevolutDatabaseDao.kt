@@ -1,11 +1,9 @@
 package com.example.revoluttask.model
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import kotlinx.coroutines.Deferred
 
 @Dao
 interface RevolutDatabaseDao {
@@ -22,10 +20,7 @@ interface RevolutDatabaseDao {
     @Query("DELETE FROM latest_rate_table")
     fun clearAllRates()
 
-    @Query("SELECT * FROM latest_rate_table ORDER BY CASE WHEN currency_rate = 1.0 THEN 0 ELSE 1 END, currency_rate")
-    suspend fun getAllRates(): List<Rate>
-
-//    @Query("SELECT * FROM latest_rate_table ORDER BY rateId")
-//    fun getAllRates(): List<Rate>
+    @Query("SELECT * FROM latest_rate_table ORDER BY CASE WHEN currency_rate = 1.00 THEN 0 ELSE 1 END")
+    fun getAllRates(): List<Rate>
 }
 

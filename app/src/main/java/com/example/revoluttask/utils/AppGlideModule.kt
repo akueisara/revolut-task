@@ -1,4 +1,4 @@
-package com.example.revoluttask.util
+package com.example.revoluttask.utils
 
 import com.bumptech.glide.annotation.GlideModule
 import com.bumptech.glide.module.AppGlideModule

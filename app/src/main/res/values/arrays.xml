@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="currency_code_array">
+        <item>@string/aud</item>
+        <item>＠string/bgn</item>
+        <item>@string/brl</item>
+        <item>@string/cad</item>
+        <item>@string/chf</item>
+        <item>@string/cny</item>
+        <item>@string/czk</item>
+        <item>@string/dkk</item>
+        <item>@string/eur</item>
+        <item>@string/gbp</item>
+        <item>@string/hkd</item>
+        <item>@string/hrk</item>
+        <item>@string/huf</item>
+        <item>@string/idr</item>
+        <item>@string/ils</item>
+        <item>@string/inr</item>
+        <item>@string/isk</item>
+        <item>@string/jpy</item>
+        <item>@string/krw</item>
+        <item>@string/mxn</item>
+        <item>@string/myr</item>
+        <item>@string/nok</item>
+        <item>@string/nzd</item>
+        <item>@string/php</item>
+        <item>@string/pln</item>
+        <item>@string/ron</item>
+        <item>@string/rub</item>
+        <item>@string/sek</item>
+        <item>@string/sgd</item>
+        <item>@string/thb</item>
+        <item>@string/ctry</item>
+        <item>@string/usd</item>
+        <item>@string/zar</item>
+    </string-array>
+
+</resources>

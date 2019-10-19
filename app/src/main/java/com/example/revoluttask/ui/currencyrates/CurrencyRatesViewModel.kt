@@ -1,21 +1,18 @@
 package com.example.revoluttask.ui.currencyrates
 
 import android.app.Application
-import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
-import com.example.revoluttask.R
 import com.example.revoluttask.model.Rate
 import com.example.revoluttask.model.RevolutDatabaseDao
+import com.example.revoluttask.network.ApiError
 import com.example.revoluttask.network.RevolutApi
 import com.example.revoluttask.network.RevolutApiStatus
 import com.example.revoluttask.network.latestrate.Rates
+import com.example.revoluttask.utils.CurrencyRatesUtil
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ticker
-import timber.log.Timber
-import java.net.SocketTimeoutException
 import kotlin.reflect.full.memberProperties
 
 class CurrencyRatesViewModel(val database: RevolutDatabaseDao, val app: Application) : AndroidViewModel(app) {
@@ -23,11 +20,16 @@ class CurrencyRatesViewModel(val database: RevolutDatabaseDao, val app: Applicat
     private companion object {
         const val DEFAULT_CURRENCY_CODE = "EUR"
         const val DEFAULT_CURRENCY_RATE = 1.0
+        const val GET_RATE_INTERNAL = 1_000L
     }
 
     private var currencyCode: String = DEFAULT_CURRENCY_CODE
 
     private var currencyRate: Double = DEFAULT_CURRENCY_RATE
+
+    private lateinit var viewModelJob: Job
+
+    private lateinit var coroutineScope: CoroutineScope
 
     private val _status = MutableLiveData<RevolutApiStatus>()
 
@@ -39,27 +41,19 @@ class CurrencyRatesViewModel(val database: RevolutDatabaseDao, val app: Applicat
     val rateList: LiveData<MutableList<Rate>>
         get() = _ratesList
 
-    private lateinit var viewModelJob: Job
-
-    private lateinit var coroutineScope: CoroutineScope
-
     private val _ratesListFromDB = MutableLiveData<MutableList<Rate>>()
 
     val ratesListFromDB: LiveData<MutableList<Rate>>
         get() = _ratesListFromDB
 
+    private val _errorMessage = MutableLiveData<String>()
+
+    val errorMessage: LiveData<String>
+        get() = _errorMessage
+
     private var latestRates: Rates? = null
 
-    private var networkError = false
-
-    fun pauseJob() {
-        viewModelJob.cancel()
-    }
-
-    @ObsoleteCoroutinesApi
-    fun resumeJob() {
-        getLatestRates()
-    }
+    private var apiConnection = false
 
     @ObsoleteCoroutinesApi
     private fun getLatestRates(showLoading: Boolean = true) {
@@ -69,45 +63,43 @@ class CurrencyRatesViewModel(val database: RevolutDatabaseDao, val app: Applicat
             if (showLoading) {
                 _status.value = RevolutApiStatus.LOADING
             }
-            val tickerChannel = ticker(delayMillis = 1_000, initialDelayMillis = 0)
+            val tickerChannel = ticker(delayMillis = GET_RATE_INTERNAL, initialDelayMillis = 0)
             for (event in tickerChannel) {
                 try {
-                    val getLatestRatesDeferred = RevolutApi.retrofitService.getLatestRates(currencyCode).await()
+                    val getLatestRatesResponse = RevolutApi.retrofitService.getLatestRates(currencyCode).await()
                     _status.value = RevolutApiStatus.DONE
-                    networkError = true
-                    latestRates = getLatestRatesDeferred.rates
-                    _ratesList.value = ratesToRateList(latestRates!!, currencyCode)
+                    apiConnection = true
+                    latestRates = getLatestRatesResponse.rates
+                    _ratesList.value = CurrencyRatesUtil.ratesResponseToRateList(app.applicationContext, latestRates!!, currencyCode, currencyRate)
                     _ratesListFromDB.value = getRatesFromDatabase().toMutableList()
                 } catch (e: Exception) {
-                    Timber.e(e)
-                    tickerChannel.cancel()
-                    networkError = false
+                    _errorMessage.value = ApiError(e).message
+                    apiConnection = false
                     _ratesListFromDB.value = getRatesFromDatabase().toMutableList()
+                    tickerChannel.cancel()
                 }
             }
         }
     }
 
-    fun updateRateList(rateListFromDB: MutableList<Rate>) {
+    fun onGetRateListFromDB(rateListFromDB: MutableList<Rate>) {
         coroutineScope.launch {
-            if (_status.value != RevolutApiStatus.DONE || !networkError) {
+            if (_status.value == RevolutApiStatus.DONE && apiConnection) {
+                insertOrUpdateRatesToDB(latestRates, rateListFromDB)
+            } else {
                 if (rateListFromDB.size != 0) {
-                    if(!networkError) {
-                        _status.value = RevolutApiStatus.LOCALDATA
-                    } else {
-                        _status.value = RevolutApiStatus.DONE
+                    if(!apiConnection) {
+                        _status.value = RevolutApiStatus.DONE_WITHOUT_CONNECTION
                     }
                     if (latestRates != null) {
-                        _ratesList.value = ratesToRateList(latestRates!!, currencyCode)
+                        _ratesList.value = CurrencyRatesUtil.ratesResponseToRateList(app.applicationContext, latestRates!!, currencyCode, currencyRate)
                     } else {
-                        _ratesList.value = rateListFromDBToRatesList(rateListFromDB, currencyCode)
+                        _ratesList.value = CurrencyRatesUtil.rateListFromDBToRateList(app.applicationContext, rateListFromDB, currencyCode, currencyRate)
                     }
                 } else {
                     _status.value = RevolutApiStatus.ERROR
                     _ratesList.value = ArrayList()
                 }
-            } else {
-                insertOrUpdateRatesToDatabase(latestRates, rateListFromDB)
             }
         }
     }
@@ -122,111 +114,52 @@ class CurrencyRatesViewModel(val database: RevolutDatabaseDao, val app: Applicat
         }
     }
 
-    private suspend fun insertOrUpdateRatesToDatabase(rates: Rates?, rateListFromDB: MutableList<Rate>) {
+    private suspend fun insertOrUpdateRatesToDB(rates: Rates?, rateListFromDB: MutableList<Rate>) {
         rates?.let {
             withContext(Dispatchers.IO) {
-                if (rateListFromDB.size != 0) {
-                    database.get(currencyCode)?.let { rateInDB ->
-                        rateInDB.rate = 1.0
-                        Timber.d("Update: %d", database.update(rateInDB))
-                    }
-                } else {
-                    Timber.d("Insert: %d", database.insert(Rate(code = currencyCode, rate = 1.0, flagImageResId = getFlagImageResId(currencyCode))))
-                }
+                updateOrInsertRates(DEFAULT_CURRENCY_RATE, currencyCode, rateListFromDB)
                 Rates::class.memberProperties.forEach { member ->
                     val rate = member.get(rates) as Double?
                     if (rate != null) {
-                        if (rateListFromDB.size != 0) {
-                            database.get(member.name)?.let { rateInDB ->
-                                rateInDB.rate = rate
-                                Timber.d("Update: %d", database.update(rateInDB))
-                            }
-                        } else {
-                            Timber.d("Insert: %d", database.insert(Rate(code = member.name, rate = rate, flagImageResId = getFlagImageResId(member.name))))
-                        }
+                        updateOrInsertRates(rate, member.name, rateListFromDB)
                     }
                 }
             }
         }
     }
 
-    private fun ratesToRateList(rates: Rates, baseRate: String): ArrayList<Rate> {
-        val rateList: ArrayList<Rate> = ArrayList()
-        rateList.add(Rate(code = baseRate, rate = currencyRate, flagImageResId = getFlagImageResId(baseRate)))
-        Rates::class.memberProperties.forEach { member ->
-            val rate = member.get(rates) as Double?
-            if (rate != null) {
-                rateList.add(Rate(code = member.name, rate = rate * currencyRate, flagImageResId = getFlagImageResId(member.name)))
+    private fun updateOrInsertRates(currencyRate: Double, currencyCode: String, rateListFromDB: MutableList<Rate>) {
+        if (rateListFromDB.size != 0) {
+            database.get(currencyCode)?.let { rateInDB ->
+                rateInDB.rate = currencyRate
+                database.update(rateInDB)
             }
-        }
-        return rateList
-    }
-
-    private fun rateListFromDBToRatesList(rateListFromDB: MutableList<Rate>, baseCode: String): ArrayList<Rate> {
-        Timber.d("basecode: $baseCode")
-        val updatedRateList: ArrayList<Rate> = ArrayList()
-        updatedRateList.add(Rate(code = baseCode, rate = currencyRate, flagImageResId = getFlagImageResId(baseCode)))
-        for (rate in rateListFromDB) {
-            if(rate.code == baseCode) {
-                continue
-            }
-            updatedRateList.add(Rate(code = rate.code, rate = rate.rate * currencyRate, flagImageResId = getFlagImageResId(rate.code)))
-        }
-        return updatedRateList
-    }
-
-    private fun getFlagImageResId(code: String): Int {
-        when (code) {
-            "USD" -> return R.drawable.ic_flag_usd
-            "AUD" -> return R.drawable.ic_flag_aud
-            "BGN" -> return R.drawable.ic_flag_bgn
-            "BRL" -> return R.drawable.ic_flag_brl
-            "CAD" -> return R.drawable.ic_flag_cad
-            "CHF" -> return R.drawable.ic_flag_chf
-            "CNY" -> return R.drawable.ic_flag_cny
-            "CZK" -> return R.drawable.ic_flag_czk
-            "DKK" -> return R.drawable.ic_flag_dkk
-            "EUR" -> return R.drawable.ic_flag_eur
-            "GBP" -> return R.drawable.ic_flag_gbp
-            "HKD" -> return R.drawable.ic_flag_hkd
-            "HRK" -> return R.drawable.ic_flag_hrk
-            "HUF" -> return R.drawable.ic_flag_huf
-            "IDR" -> return R.drawable.ic_flag_idr
-            "ILS" -> return R.drawable.ic_flag_ils
-            "INR" -> return R.drawable.ic_flag_inr
-            "ISK" -> return R.drawable.ic_flag_isk
-            "JPY" -> return R.drawable.ic_flag_jpy
-            "KRW" -> return R.drawable.ic_flag_krw
-            "MXN" -> return R.drawable.ic_flag_mxn
-            "MYR" -> return R.drawable.ic_flag_myr
-            "NOK" -> return R.drawable.ic_flag_nok
-            "NZD" -> return R.drawable.ic_flag_nzd
-            "PHP" -> return R.drawable.ic_flag_php
-            "PLN" -> return R.drawable.ic_flag_pln
-            "RON" -> return R.drawable.ic_flag_ron
-            "RUB" -> return R.drawable.ic_flag_rub
-            "SEK" -> return R.drawable.ic_flag_sek
-            "SGD" -> return R.drawable.ic_flag_sgd
-            "THB" -> return R.drawable.ic_flag_thb
-            "TRY" -> return R.drawable.ic_flag_try
-            "ZAR" -> return R.drawable.ic_flag_zar
-            else -> return R.drawable.ic_flag_placeholder
-
+        } else {
+            database.insert(Rate(code = currencyCode, rate = currencyRate, flagImageResId = CurrencyRatesUtil.getFlagImageResId(app.applicationContext, currencyCode)))
         }
     }
 
     @ObsoleteCoroutinesApi
     fun onUpdateRates(rateList: MutableList<Rate>, moveToTop: Boolean) {
-        if(!networkError) {
-            Toast.makeText(app.applicationContext, "Please connect to the internet to get the latest rate", Toast.LENGTH_SHORT).show()
-        } else if (rateList.size > 0) {
+        if (rateList.size > 0) {
             currencyCode = rateList[0].code
             currencyRate = rateList[0].rate
             if (moveToTop) {
                 viewModelJob.cancel()
                 getLatestRates(false)
+            } else if(!apiConnection) {
+                _ratesListFromDB.value = _ratesListFromDB.value
             }
         }
+    }
+
+    @ObsoleteCoroutinesApi
+    fun resumeJob() {
+        getLatestRates()
+    }
+
+    fun pauseJob() {
+        viewModelJob.cancel()
     }
 
     override fun onCleared() {

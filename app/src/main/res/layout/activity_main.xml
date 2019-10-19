@@ -20,13 +20,12 @@
                 android:minHeight="?attr/actionBarSize">
 
                 <TextView
+                    style="@style/TextStyle.Roboto.Large"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="72dp"
-                    android:fontFamily="@font/roboto_medium"
+                    android:layout_marginStart="@dimen/appbar_margin_start"
                     android:text="@string/rates"
-                    android:textColor="@android:color/black"
-                    android:textSize="20sp" />
+                    android:textColor="@android:color/black" />
 
             </androidx.appcompat.widget.Toolbar>
         </com.google.android.material.appbar.AppBarLayout>

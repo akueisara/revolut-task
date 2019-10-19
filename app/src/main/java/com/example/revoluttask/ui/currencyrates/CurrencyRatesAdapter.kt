@@ -1,5 +1,6 @@
 package com.example.revoluttask.ui.currencyrates
 
+import android.content.Context
 import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
@@ -9,10 +10,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.revoluttask.databinding.ListRatesBinding
 import com.example.revoluttask.model.Rate
-import com.example.revoluttask.util.Converter
+import com.example.revoluttask.utils.Converter
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
-import com.example.revoluttask.util.placeCursorToProperDigitPosition
+import com.example.revoluttask.utils.placeCursorToProperDigitPosition
 
 
 class CurrencyRatesAdapter(var rateList: MutableList<Rate>, val clickListener: RateClickListener) : RecyclerView.Adapter<CurrencyRatesAdapter.ViewHolder>()  {
@@ -35,10 +37,6 @@ class CurrencyRatesAdapter(var rateList: MutableList<Rate>, val clickListener: R
                 if (hasFocus) {
                     scrollToTop(true)
                 }
-            }
-
-            if(!APIConnected) {
-                binding.currencyRateEditText.isEnabled = false
             }
 
             binding.currencyRateEditText.addTextChangedListener(object : TextWatcher {

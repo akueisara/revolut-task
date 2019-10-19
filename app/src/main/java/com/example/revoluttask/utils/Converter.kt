@@ -1,4 +1,4 @@
-package com.example.revoluttask.util
+package com.example.revoluttask.utils
 
 import androidx.databinding.InverseMethod
 import java.text.NumberFormat
@@ -17,8 +17,7 @@ object Converter {
             return 1.0
         }
         val nf = NumberFormat.getInstance(Locale.US)
-        val df = nf.parse(value).toDouble()
-        return df
+        return nf.parse(value).toDouble()
     }
 
     @JvmStatic
