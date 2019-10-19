@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="com.example.revoluttask.util.Converter" />
+
+        <variable
+            name="rate"
+            type="com.example.revoluttask.model.Rate" />
+
+        <variable
+            name="adapter"
+            type="com.example.revoluttask.ui.currencyrates.CurrencyRatesAdapter" />
+
+    </data>
+
+    <RelativeLayout
+        android:id="@+id/rateItemLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="16dp"
+        android:focusableInTouchMode="true"
+        android:background="?android:attr/selectableItemBackground">
+
+        <ImageView
+            android:id="@+id/nationalFlagImageView"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            app:imageSrc="@{rate.flagImageResId}"
+            tools:src="@drawable/ic_flag_usd" />
+
+        <LinearLayout
+            android:id="@+id/currencyNameLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_toStartOf="@+id/currencyRateEditText"
+            android:layout_toEndOf="@+id/nationalFlagImageView"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/currencyCodeTextView"
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:fontFamily="@font/roboto_medium"
+                android:text="@{rate.code}"
+                android:textColor="@color/primary_black"
+                android:textSize="16sp"
+                tools:text="USD" />
+
+            <TextView
+                android:id="@+id/currencyNameTextView"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:fontFamily="@font/roboto"
+                android:textColor="@color/primary_grey_50"
+                android:textSize="14sp"
+                tools:text="US Dollar"
+                android:text="@{Converter.currencyCodeToName(rate.code)}"/>
+
+        </LinearLayout>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/currencyRateEditText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:fontFamily="@font/roboto_medium"
+            android:inputType="numberDecimal"
+            android:maxEms="5"
+            android:maxLength="10"
+            android:text="@{Converter.doubleToRateString(rate.rate)}"
+            android:imeOptions="actionDone"
+            android:textSize="20sp"
+            tools:text="1183330.06" />
+
+    </RelativeLayout>
+</layout>
