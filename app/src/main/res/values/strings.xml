@@ -1,41 +1,45 @@
 <resources>
     <string name="app_name">RevolutTask</string>
     <string name="rates">Rates</string>
+    <string name="cannot_load_rates">Can\'t load rates</string>
+    <string name="connection_error_image_desc">Connection error</string>
+    <string name="try_again">Try again</string>
+    <string name="reload">Reload</string>
+    <string name="currency_flag_image_desc">Currency flag Image: %s</string>
 
-    <string-array name="currency_code_array">
-        <item>AUD</item>
-        <item>BGN</item>
-        <item>BRL</item>
-        <item>CAD</item>
-        <item>CHF</item>
-        <item>CNY</item>
-        <item>CZK</item>
-        <item>DKK</item>
-        <item>EUR</item>
-        <item>GBP</item>
-        <item>HKD</item>
-        <item>HRK</item>
-        <item>HUF</item>
-        <item>IDR</item>
-        <item>ILS</item>
-        <item>INR</item>
-        <item>ISK</item>
-        <item>JPY</item>
-        <item>KRW</item>
-        <item>MXN</item>
-        <item>MYR</item>
-        <item>NOK</item>
-        <item>NZD</item>
-        <item>PHP</item>
-        <item>PLN</item>
-        <item>RON</item>
-        <item>RUB</item>
-        <item>SEK</item>
-        <item>SGD</item>
-        <item>THB</item>
-        <item>TRY</item>
-        <item>USD</item>
-        <item>ZAR</item>
-    </string-array>
+    <string name="aud">AUD</string>
+    <string name="bgn">BGN</string>
+    <string name="brl">BRL</string>
+    <string name="cad">CAD</string>
+    <string name="chf">CHF</string>
+    <string name="cny">CNY</string>
+    <string name="czk">CZK</string>
+    <string name="dkk">DKK</string>
+    <string name="eur">EUR</string>
+    <string name="gbp">GBP</string>
+    <string name="hkd">HKD</string>
+    <string name="hrk">HRK</string>
+    <string name="huf">HUF</string>
+    <string name="idr">IDR</string>
+    <string name="ils">ILS</string>
+    <string name="inr">INR</string>
+    <string name="isk">ISK</string>
+    <string name="jpy">JPY</string>
+    <string name="krw">KRW</string>
+    <string name="mxn">MXN</string>
+    <string name="myr">MYR</string>
+    <string name="nok">NOK</string>
+    <string name="nzd">NZD</string>
+    <string name="php">PHP</string>
+    <string name="pln">PLN</string>
+    <string name="ron">RON</string>
+    <string name="rub">RUB</string>
+    <string name="sek">SEK</string>
+    <string name="sgd">SGD</string>
+    <string name="thb">THB</string>
+    <string name="ctry">TRY</string>
+    <string name="usd">USD</string>
+    <string name="zar">ZAR</string>
+
 
 </resources>

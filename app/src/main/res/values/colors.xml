@@ -4,12 +4,10 @@
     <color name="colorPrimaryDark">#CCCCCC</color>
     <color name="colorAccent">#2E64C6</color>
 
-    <color name="primary_black">#191C1F</color>
-    <color name="primary_grey_50">#8B959E</color>
-    <color name="primary_red_400">#EF5350</color>
-    <color name="primary_teal_400">#46CD37</color>
-    <color name="primary_purple_500">#9C27B0</color>
+    <color name="green_pastel">#6BD75F</color>
     <color name="gray_pastel">#CBD4C2</color>
-
     <color name="grey_dark">#A9A9A9</color>
+    <color name="primary_grey_50">#8B959E</color>
+    <color name="primary_black">#191C1F</color>
+
 </resources>

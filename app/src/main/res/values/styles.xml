@@ -13,4 +13,52 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+
+    <style name="TextStyle.Roboto" parent="android:Widget.TextView">
+        <item name="android:fontFamily">@font/roboto</item>
+    </style>
+
+    <style name="TextStyle.Roboto.Standard" parent="android:Widget.TextView">
+        <item name="android:textSize">@dimen/standard_text_size</item>
+    </style>
+
+    <style name="TextStyle.Roboto.Medium" parent="android:Widget.TextView">
+        <item name="android:textSize">@dimen/medium_text_size</item>
+    </style>
+
+    <style name="TextStyle.Roboto.Large" parent="android:Widget.TextView">
+        <item name="android:textSize">@dimen/large_text_size</item>
+    </style>
+
+    <style name="TextStyle.Roboto.ExtraLarge" parent="android:Widget.TextView">
+        <item name="android:textSize">@dimen/extra_large_text_size</item>
+    </style>
+
+    <style name="TextStyle.RobotoMedium" parent="android:Widget.TextView">
+        <item name="android:fontFamily">@font/roboto_medium</item>
+    </style>
+
+    <style name="TextStyle.RobotoMedium.Medium" parent="TextStyle.RobotoMedium">
+        <item name="android:textSize">@dimen/medium_text_size</item>
+    </style>
+
+    <style name="TextStyle.RobotoMedium.Large" parent="TextStyle.RobotoMedium">
+        <item name="android:textSize">@dimen/large_text_size</item>
+    </style>
+
+    <style name="ClickableTextStyle">
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:textColor">@color/selector_text_clickable</item>
+    </style>
+
+    <style name="ClickableTextStyle.Medium" parent="TextStyle.Roboto.Medium">
+        <item name="android:textColor">@color/selector_text_clickable</item>
+    </style>
+
+    <style name="ClickableTextStyle.ExtraLarge" parent="TextStyle.Roboto.ExtraLarge">
+        <item name="android:textColor">@color/selector_text_clickable</item>
+    </style>
+
+
 </resources>

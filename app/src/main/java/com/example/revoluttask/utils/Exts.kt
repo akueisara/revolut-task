@@ -1,4 +1,4 @@
-package com.example.revoluttask.util
+package com.example.revoluttask.utils
 
 import android.widget.EditText
 import androidx.fragment.app.Fragment
