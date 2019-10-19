@@ -6,7 +6,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.revoluttask.model.Rate
 import com.example.revoluttask.model.RevolutDatabaseDao
-import com.example.revoluttask.network.ApiError
 import com.example.revoluttask.network.RevolutApi
 import com.example.revoluttask.network.RevolutApiStatus
 import com.example.revoluttask.network.latestrate.Rates
@@ -73,7 +72,7 @@ class CurrencyRatesViewModel(val database: RevolutDatabaseDao, val app: Applicat
                     _ratesList.value = CurrencyRatesUtil.ratesResponseToRateList(app.applicationContext, latestRates!!, currencyCode, currencyRate)
                     _ratesListFromDB.value = getRatesFromDatabase().toMutableList()
                 } catch (e: Exception) {
-                    _errorMessage.value = ApiError(e).message
+                    _errorMessage.value = RevolutApi.APIError(e).message
                     apiConnection = false
                     _ratesListFromDB.value = getRatesFromDatabase().toMutableList()
                     tickerChannel.cancel()
@@ -82,7 +81,7 @@ class CurrencyRatesViewModel(val database: RevolutDatabaseDao, val app: Applicat
         }
     }
 
-    fun onGetRateListFromDB(rateListFromDB: MutableList<Rate>) {
+    fun onGetRateListFromDBorResponse(rateListFromDB: MutableList<Rate>) {
         coroutineScope.launch {
             if (_status.value == RevolutApiStatus.DONE && apiConnection) {
                 insertOrUpdateRatesToDB(latestRates, rateListFromDB)
